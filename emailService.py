@@ -327,12 +327,8 @@ html_format = html_format.replace("{username}","Gaurav")
 def sendEmail(sender,receiver,html_format,subject):
     configuration = sib_api_v3_sdk.Configuration()
     configuration.api_key['api-key'] = os.getenv("BREV_API_KEY")
-    # Create an instance of the API class
     api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
 
-
-
-    # Setup email content and details
     send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
         to=[{"email": "gaurav.shetty@gleecus.com", "name": "Gaurav Shetty"}],
         sender={"email": "gauravshetty4452@gmail.com", "name": "Gaurav"},
@@ -345,3 +341,5 @@ def sendEmail(sender,receiver,html_format,subject):
         pprint(api_response)
     except ApiException as e:
         print("Exception when sending transactional email: %s\n" % e)
+
+sendEmail("gauravshetty4452@gmail.com","gaurav.shetty@gleecus.com",html_format,"Registration")

@@ -2,3 +2,6 @@ fastapi
 supabase 
 dotenv
 sib_api_v3_sdk
+pyjwt
+passlib[bcrypt]
+python-multipart

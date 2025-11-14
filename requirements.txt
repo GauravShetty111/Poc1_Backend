@@ -1,7 +1,11 @@
 fastapi
 supabase 
-dotenv
+python-dotenv
 sib_api_v3_sdk
-pyjwt
-passlib[bcrypt]
+python-jose[cryptography]
+passlib==1.7.4
+bcrypt==3.2.2
 python-multipart
+email-validator
+requests
+uvicorn

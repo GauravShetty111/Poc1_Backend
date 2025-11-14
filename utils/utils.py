@@ -13,7 +13,7 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+REFRESH_TOKEN_EXPIRE_DAYS = 4
 
 
 def create_access_token(data: dict):
@@ -40,8 +40,6 @@ def verify_token(token: str, model):
         raise HTTPException(status_code=422, detail=e.errors())
 
 
-token = create_access_token({"user_id": 1,"username":"Gaurav","password":"1234"})
 
-response = verify_token(token)
 
 

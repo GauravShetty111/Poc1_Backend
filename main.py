@@ -288,3 +288,51 @@ async def get_columns(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+class ChartRequest(BaseModel):
+    table_name: str
+    chart_type: str  # "bar", "line", "pie", "scatter"
+    x_column: str
+    y_column: str = None
+    
+@app.post("/generate-chart")
+async def generate_chart(
+    request: ChartRequest,
+    current_user: UserModel = Depends(get_current_user)
+):
+    try:
+        file_path = f"data/{request.table_name}_{current_user.user_id}.csv"
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Dataset not found")
+        
+        df = pd.read_csv(file_path)
+        
+        if request.x_column not in df.columns:
+            raise HTTPException(status_code=400, detail="X column not found")
+        
+        if request.chart_type == "pie":
+            data = df[request.x_column].value_counts().to_dict()
+            return {
+                "chart_type": "pie",
+                "data": [{"label": k, "value": v} for k, v in data.items()]
+            }
+        
+        if request.y_column and request.y_column not in df.columns:
+            raise HTTPException(status_code=400, detail="Y column not found")
+        
+        if request.chart_type in ["bar", "line", "scatter"]:
+            if not request.y_column:
+                raise HTTPException(status_code=400, detail="Y column required")
+            
+            chart_data = df[[request.x_column, request.y_column]].to_dict(orient="records")
+            return {
+                "chart_type": request.chart_type,
+                "data": chart_data,
+                "x_column": request.x_column,
+                "y_column": request.y_column
+            }
+        
+        raise HTTPException(status_code=400, detail="Invalid chart type")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

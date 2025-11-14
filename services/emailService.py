@@ -343,3 +343,62 @@ def sendEmail(receiver,subject):
     except ApiException as e:
         print("Exception when sending transactional email: %s\n" % e)
 
+
+otp_html_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .otp-box { background-color: #f8f9fa; border: 2px solid #007bff; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+        .otp-code { font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 5px; margin: 10px 0; }
+        .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Email Verification</h1>
+            <p>Please verify your email address to complete registration</p>
+        </div>
+        
+        <div class="otp-box">
+            <h2>Your Verification Code</h2>
+            <div class="otp-code">{otp}</div>
+            <p>This code will expire in 10 minutes</p>
+        </div>
+        
+        <p>Enter this code in the verification form to activate your account.</p>
+        <p>If you didn't request this verification, please ignore this email.</p>
+        
+        <div class="footer">
+            <p>This is an automated message, please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+def sendOTPEmail(receiver, otp):
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = os.getenv("BREV_API_KEY")
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+
+    html_content = otp_html_template.replace("{otp}", otp)
+    
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": receiver, "name": "User"}],
+        sender={"email": "gauravshetty4452@gmail.com", "name": "Your App"},
+        subject="Email Verification - OTP Code",
+        html_content=html_content
+    )
+
+    try:
+        api_response = api_instance.send_transac_email(send_smtp_email)
+        print(f"OTP email sent successfully to {receiver}")
+        return True
+    except ApiException as e:
+        print(f"Exception when sending OTP email: {e}")
+        return False

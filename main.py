@@ -18,6 +18,7 @@ import io
 import pandas as pd
 import json
 from passlib.context import CryptContext
+# from dashboard_routes import router as dashboard_router
 
 load_dotenv()
 
@@ -66,6 +67,8 @@ class UserModel(BaseModel):
 
 app = FastAPI()
 security = HTTPBearer()
+
+# app.include_router(dashboard_router, prefix="/api", tags=["dashboard"])
 
 @app.on_event("startup")
 async def startup_event():
@@ -532,10 +535,21 @@ async def get_file_data(
         
         file_data, mime_type, original_name = result
         
-        if not mime_type or 'csv' not in mime_type.lower():
+        if not original_name.lower().endswith('.csv'):
             raise HTTPException(status_code=400, detail="File is not a CSV")
         
-        df = pd.read_csv(io.BytesIO(bytes(file_data)))
+        try:
+            # Try different encodings
+            for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+                try:
+                    df = pd.read_csv(io.BytesIO(bytes(file_data)), encoding=encoding)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                raise Exception("Could not decode file with any supported encoding")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error reading CSV: {str(e)}")
         
         start = offset
         end = offset + limit
@@ -586,7 +600,15 @@ async def get_file_columns(
         if not mime_type or 'csv' not in mime_type.lower():
             raise HTTPException(status_code=400, detail="File is not a CSV")
         
-        df = pd.read_csv(io.BytesIO(bytes(file_data)))
+        # Try different encodings
+        for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+            try:
+                df = pd.read_csv(io.BytesIO(bytes(file_data)), encoding=encoding)
+                break
+            except UnicodeDecodeError:
+                continue
+        else:
+            raise HTTPException(status_code=400, detail="Could not decode CSV file")
         
         return {
             "filename": original_name,
@@ -627,7 +649,15 @@ async def generate_chart_db(
         if not mime_type or 'csv' not in mime_type.lower():
             raise HTTPException(status_code=400, detail="File is not a CSV")
         
-        df = pd.read_csv(io.BytesIO(bytes(file_data)))
+        # Try different encodings
+        for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+            try:
+                df = pd.read_csv(io.BytesIO(bytes(file_data)), encoding=encoding)
+                break
+            except UnicodeDecodeError:
+                continue
+        else:
+            raise HTTPException(status_code=400, detail="Could not decode CSV file")
         
         if x_column not in df.columns:
             raise HTTPException(status_code=400, detail="X column not found")

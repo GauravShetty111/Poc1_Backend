@@ -390,7 +390,7 @@ def sendOTPEmail(receiver, otp):
     
     send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
         to=[{"email": receiver, "name": "User"}],
-        sender={"email": "gauravshetty4452@gmail.com", "name": "Your App"},
+        sender={"email": "gauravshetty4452@gmail.com", "name": "Gaurav's App"},
         subject="Email Verification - OTP Code",
         html_content=html_content
     )

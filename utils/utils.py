@@ -39,7 +39,3 @@ def verify_token(token: str, model):
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
 
-
-
-
-
